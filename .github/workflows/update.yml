@@ -1,0 +1,45 @@
+name: Daily talosctl Update
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight UTC
+  workflow_dispatch:     # Allows you to click "Run workflow" manually
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write    # Required to push changes back to the repo
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Latest talosctl Version
+        id: get_version
+        run: |
+          # Query GitHub API for the latest release tag and strip the 'v'
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/siderolabs/talos/releases/latest | jq -r .tag_name | sed 's/^v//')
+          echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update Spec File
+        run: |
+          NEW_VERSION=${{ steps.get_version.outputs.version }}
+          # Update the Version: line in the spec file
+          sed -i "s/^Version:.*/Version: $NEW_VERSION/" talosctl.spec
+          # Reset Release to 1 whenever the version changes
+          sed -i "s/^Release:.*/Release: 1%{?dist}/" talosctl.spec
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add talosctl.spec
+          
+          # Only commit and push if the file actually changed
+          if git commit -m "Update talosctl to ${{ steps.get_version.outputs.version }}"; then
+            git push
+          else
+            echo "No new version detected. Skipping push."
+          fi
