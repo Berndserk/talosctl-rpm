@@ -30,3 +30,24 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# RPM Build Artifacts
+*.rpm
+*.srpm
+/arm64/
+/amd64/
+/x86_64/
+/aarch64/
+
+# RPM Directory Structure (if building locally)
+BUILD/
+BUILDROOT/
+RPMS/
+SOURCES/
+SPECS/
+SRPMS/
+
+# Copr/Mock logs and results
+results_*/
+*.log
+*.gz
