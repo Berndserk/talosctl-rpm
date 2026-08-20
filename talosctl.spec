@@ -1,5 +1,5 @@
 Name:           talosctl
-Version: 1.13.8
+Version: 1.13.9
 Release: 1%{?dist}
 Summary:        CLI for Talos Linux
 License:        MPL-2.0
